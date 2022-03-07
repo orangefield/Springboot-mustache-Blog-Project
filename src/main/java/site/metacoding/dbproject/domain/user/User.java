@@ -13,6 +13,7 @@ import javax.persistence.UniqueConstraint;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.web.servlet.FlashMapManager;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,7 +40,7 @@ public class User {
     private String username; // ssar 아이디
     @Column(length = 12, nullable = false)
     private String password;
-    @Column(length = 16000000)
+    @Column(length = 16000000, nullable = false)
     private String email;
 
     @CreatedDate // insert

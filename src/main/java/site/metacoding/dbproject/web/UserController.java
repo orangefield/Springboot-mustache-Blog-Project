@@ -39,7 +39,22 @@ public class UserController {
     // 회원가입 - 로그인 X
     @PostMapping("/join")
     public String join(User user) {
+        // 1.1 username, password, email null 체크
+        // username=ssar&password=&email=ssar@nate.com 패스워드 공백
+        // username=ssar&email=ssar@nate.com 패스워드 null
+        if (user.getUsername() == null || user.getPassword() == null || user.getEmail() == null) {
+            return "redirect:/joinForm";
+        }
+        if (user.getUsername().equals("") || user.getPassword().equals("") || user.getEmail().equals("")) {
+            return "redirect:/joinForm";
+        }
+        // 1.2 username, password, email 공백 체크(난 희한한 공백을 체크했구나)
+        // if (user.getUsername().contains(" ") || user.getPassword().contains(" ") ||
+        // user.getEmail().contains(" ")) {
+        // return "redirect:/joinForm";
+        // }
 
+        // 2. 핵심 로직
         System.out.println("user: " + user); // 동기화 되기 전
         User userEntity = userRepository.save(user);
         System.out.println("userEntity: " + userEntity); // 동기화 된 후
@@ -62,8 +77,9 @@ public class UserController {
     // 로그인 - 로그인 안한 사람이 할 수 있는거지!
     @PostMapping("/login")
     // User user는 고객에게서 받아온 것(Entity 아님)
-    public String login(HttpServletRequest request, User user) {
-        HttpSession session = request.getSession();
+    public String login(User user) {
+        // public String login(HttpServletRequest request, User user) {
+        // HttpSession session = request.getSession();
 
         // DB에서 동기화되어 받아온것
         User userEntity = userRepository.mLogin(user.getUsername(), user.getPassword());
