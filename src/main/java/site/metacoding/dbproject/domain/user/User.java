@@ -8,12 +8,11 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.Transient;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.web.servlet.FlashMapManager;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,4 +46,8 @@ public class User {
     private LocalDateTime createDate;
     @LastModifiedDate // insert, update
     private LocalDateTime updateDate;
+
+    //////////////////////////////////////// DB 테이블과 상관없음
+    @Transient
+    private String remember;
 }

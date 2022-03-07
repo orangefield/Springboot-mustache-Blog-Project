@@ -2,7 +2,9 @@ package site.metacoding.dbproject.web;
 
 import java.util.Optional;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
@@ -65,7 +67,15 @@ public class UserController {
 
     // 로그인 페이지(정적) - 로그인 X
     @GetMapping("/loginForm")
-    public String loginForm() {
+    public String loginForm(HttpServletRequest request, Model model) {
+        // request.getHeader("Cookie"); -> 파싱해야 함
+        Cookie[] cookies = request.getCookies(); // jSessionId, remember 두 개가 있음
+        for (Cookie cookie : cookies) {
+            System.out.println("쿠키값 : " + cookie.getName());
+            if (cookie.getName().equals("remember")) {
+                model.addAttribute("remember", cookie.getValue());
+            }
+        }
         // 얘는 파일 찾는거 맞음
         return "user/loginForm";
     }
@@ -77,10 +87,11 @@ public class UserController {
     // 로그인 - 로그인 안한 사람이 할 수 있는거지!
     @PostMapping("/login")
     // User user는 고객에게서 받아온 것(Entity 아님)
-    public String login(User user) {
+    public String login(User user, HttpServletResponse response) {
         // public String login(HttpServletRequest request, User user) {
         // HttpSession session = request.getSession();
 
+        System.out.println("사용자로부터 받은 username, password : " + user);
         // DB에서 동기화되어 받아온것
         User userEntity = userRepository.mLogin(user.getUsername(), user.getPassword());
 
@@ -91,6 +102,10 @@ public class UserController {
             // 세션 영역에 저장하자
             // 보통 키값을 principal(인증주체), 밸류에 userEntity
             session.setAttribute("principal", userEntity);
+
+            if (user.getRemember().equals("on")) {
+                response.setHeader("Set-Cookie", "remember=" + user.getUsername());
+            }
         }
         // 1. DB 연결해서 username, password 있는지 확인
         // 2. 있으면 session 영역에 '인증됨' 이라고 메시지 하나 넣어두자
@@ -124,7 +139,7 @@ public class UserController {
             return "error/page1";
         }
 
-        // DB에 로그 남기기
+        // DB에 로그 남기기 (로그인 한 아이디를)
     }
 
     // 유저수정 페이지(동적 페이지) - 로그인 O
