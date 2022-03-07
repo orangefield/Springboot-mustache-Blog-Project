@@ -11,6 +11,8 @@ server:
 # ddl-auto: none 은 서버 실행할 때마다 아무것도 하지 않는 옵션이다.
 # ddl-update : update 는 필드 수정시에 필요한 옵션이다.(필드 삭제는 DB에서 직접하세요!)
 spring:
+  mustache:
+    expose-session-attributes: true
   datasource:
       url: jdbc:mysql://localhost:3306/greendb
       driver-class-name: com.mysql.cj.jdbc.Driver
