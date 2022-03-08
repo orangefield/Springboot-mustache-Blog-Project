@@ -69,11 +69,15 @@ public class UserController {
     @GetMapping("/loginForm")
     public String loginForm(HttpServletRequest request, Model model) {
         // request.getHeader("Cookie"); -> 파싱해야 함
-        Cookie[] cookies = request.getCookies(); // jSessionId, remember 두 개가 있음
-        for (Cookie cookie : cookies) {
-            System.out.println("쿠키값 : " + cookie.getName());
-            if (cookie.getName().equals("remember")) {
-                model.addAttribute("remember", cookie.getValue());
+        if (request.getCookies() != null) {
+            Cookie[] cookies = request.getCookies();
+
+            for (Cookie cookie : cookies) {
+                System.out.println("쿠키값 : " + cookie.getName());
+                if (cookie.getName().equals("remember")) {
+                    model.addAttribute("remember", cookie.getValue());
+                }
+                ;
             }
         }
         // 얘는 파일 찾는거 맞음
@@ -103,8 +107,9 @@ public class UserController {
             // 보통 키값을 principal(인증주체), 밸류에 userEntity
             session.setAttribute("principal", userEntity);
 
-            if (user.getRemember().equals("on")) {
-                response.setHeader("Set-Cookie", "remember=" + user.getUsername());
+            if (user.getRemember() != null && user.getRemember().equals("on")) {
+                response.addHeader("Set-Cookie", "remember=" + user.getUsername());
+                // response.addHeader(name, value);
             }
         }
         // 1. DB 연결해서 username, password 있는지 확인
