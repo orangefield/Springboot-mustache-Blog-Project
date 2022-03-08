@@ -118,8 +118,15 @@ public class UserController {
         return "redirect:/"; // PostController 만들고 수정하자
     }
 
+    // 로그아웃 - 로그인 한 사람만 할 수 있지!
+    @GetMapping("/logout")
+    public String logout() {
+        session.invalidate();
+        return "redirect:/loginForm"; // PostController 만들고 수정하자
+    }
+
     // 유저상세 페이지(동적 페이지) - 로그인 해야 볼 수 있음 O
-    @GetMapping("/user/{id}")
+    @GetMapping("/s/user/{id}")
     public String detail(@PathVariable Integer id, Model model) {
 
         User principal = (User) session.getAttribute("principal");
@@ -148,21 +155,15 @@ public class UserController {
     }
 
     // 유저수정 페이지(동적 페이지) - 로그인 O
-    @GetMapping("/user/updateForm")
+    @GetMapping("/s/user/updateForm")
     public String updateForm() {
         return "user/updateForm";
     }
 
     // 유저 수정 - 로그인 O
-    @PutMapping("/user/{id}")
+    @PutMapping("/s/user/{id}")
     public String update(@PathVariable Integer id) {
         return "redirect:/user/" + id;
     }
 
-    // 로그아웃 - 로그인 한 사람만 할 수 있지!
-    @GetMapping("/logout")
-    public String logout() {
-        session.invalidate();
-        return "redirect:/loginForm"; // PostController 만들고 수정하자
-    }
 }
