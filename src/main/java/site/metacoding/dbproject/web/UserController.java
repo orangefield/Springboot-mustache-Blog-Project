@@ -11,10 +11,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
@@ -123,7 +125,7 @@ public class UserController {
     @GetMapping("/s/user/{id}")
     public String detail(@PathVariable Integer id, Model model) {
 
-        // 유효성 검사 하기 (수십개....엄청 많겠죠?)
+        // 유효성 검사 하기 (엄청 많음)
 
         User principal = (User) session.getAttribute("principal");
 
@@ -154,11 +156,35 @@ public class UserController {
         return "user/updateForm";
     }
 
+    // username(X), password(O), email(O)
+    // password=1234&email=ssar@nate.com (x-www-form-urlencoded)
+    // {"password":"1234,"email":"ssar@nate.com"} (application/json) <- 통신!
+    // JSON을 받을 것이기 때문에 Spring이 데이터를 받을 때 파싱전략을 변경해줘야 한다
+    // Put 요청은 Http Body가 있다 -> Http Header의 Content-Type에 MIME타입을 알려줘야 한다
+
+    // @RequestBody -> BufferedReader + JSON 파싱(자바오브젝트일 때 파싱)
+    // @ResponseBody -> BufferedWriter + JSON 파싱(자바오브젝트일 때 파싱)
+
     // 유저수정 - 로그인O
     @PutMapping("/s/user/{id}")
-    public String update(@PathVariable Integer id) {
+    public @ResponseBody ResponseDto<String> update(@PathVariable Integer id, @RequestBody User user) {
 
-        return "redirect:/user/" + id;
+        User principal = (User) session.getAttribute("principal");
+
+        // 1. 인증 체크
+        if (principal == null) {
+            return new ResponseDto<String>(-1, "인증안됨", null);
+        }
+
+        // 2. 권한체크
+        if (principal.getId() != id) {
+            return new ResponseDto<String>(-1, "권한없음", null);
+        }
+
+        User userEntity = userService.유저수정(id, user);
+        session.setAttribute("principal", userEntity); // 세션 변경 - 덮어쓰기
+
+        return new ResponseDto<String>(1, "성공", null);
     }
 
 }
