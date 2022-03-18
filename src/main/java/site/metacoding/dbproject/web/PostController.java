@@ -1,11 +1,8 @@
 package site.metacoding.dbproject.web;
 
-import java.util.Optional;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,14 +56,28 @@ public class PostController {
     @GetMapping("/post/{id}") // Get요청에 /post 제외 시키기
     public String detail(@PathVariable Integer id, Model model) {
 
+        // 1. 인증
+        User principal = (User) session.getAttribute("principal");
+
+        // 권한
         Post postEntity = postService.글상세보기(id);
 
+        // 게시물이 없으면 error 페이지 이동
         if (postEntity == null) {
             return "error/page1";
-        } else {
-            model.addAttribute("post", postEntity);
-            return "post/detail";
         }
+
+        if (principal != null) {
+            // 권한 확인해서 view로 값 넘김
+            if (principal.getId() == postEntity.getUser().getId()) { // 권한 있음
+                model.addAttribute("pageOwner", true);
+            } else {
+                model.addAttribute("pageOwner", false);
+            }
+        }
+
+        model.addAttribute("post", postEntity);
+        return "post/detail";
 
     }
 
