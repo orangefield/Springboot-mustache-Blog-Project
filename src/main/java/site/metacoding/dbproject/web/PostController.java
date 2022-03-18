@@ -21,6 +21,7 @@ import site.metacoding.dbproject.domain.post.Post;
 import site.metacoding.dbproject.domain.post.PostRepository;
 import site.metacoding.dbproject.domain.user.User;
 import site.metacoding.dbproject.service.PostService;
+import site.metacoding.dbproject.web.dto.ResponseDto;
 
 @RequiredArgsConstructor // final이 붙은 애들에 대한 생성자를 만들어준다.
 @Controller
@@ -77,8 +78,24 @@ public class PostController {
 
     // DELETE 글삭제 /post/{id} - 글목록으로 가기 - 인증 O
     @DeleteMapping("/s/post/{id}")
-    public String delete(@PathVariable Integer id) {
-        return "redirect:/";
+    public @ResponseBody ResponseDto<String> delete(@PathVariable Integer id) {
+
+        // 1. 인증
+        User principal = (User) session.getAttribute("principal");
+
+        if (principal == null) { // 로그인이 안됐을 경우
+            return new ResponseDto<String>(-1, "로그인이 되지 않았습니다", null);
+        }
+
+        Post postEntity = postService.글상세보기(id);
+
+        if (principal.getId() != postEntity.getUser().getId()) { // 권한 없는 경우
+            return new ResponseDto<String>(-1, "해당 글을 삭제할 권한이 없습니다", null);
+        }
+
+        postService.글삭제하기(id); // 내부에 exception이 터지면 무조건 stacktrace 리턴한다.
+
+        return new ResponseDto<String>(1, "성공", null);
     }
 
     // UPDATE 글수정 /post/{id} - 글상세보기 페이지가기 - 인증 O
